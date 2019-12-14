@@ -12,18 +12,23 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.util.Log;
+
 
 public class MainActivity extends AppCompatActivity {
-
+    //url of thermometer server
+    //using Flask to serve JSON content, so port 5000
+    static final String URL = "http://ec2-3-15-14-91.us-east-2.compute.amazonaws.com:5000/";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("debug","console!");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         TextView text=findViewById(R.id.testDisplay);
-        text.setText("test");
+        text.setText(fetchTemps(URL, text));
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -57,13 +62,23 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public int fetchTemps(String serverURL){
+    public String fetchTemps(String serverURL, TextView textView){
         //contacts the server and retrieves the data
         //JSON format, contains temperature, name of thermometer, and datetime of when it was last updated
         //Will have to be asynchronous
 
+        String result;
+        HttpGetRequest getRequest = new HttpGetRequest();
+        try{
+            result = getRequest.execute(URL).get();
+            Log.d("debug","Called getRequest.execute");
+        }catch(Exception e){
+            result = "Could not connect to server";
+        }
 
-        return 0;   //change return type to a usable array
+        textView.setText(result);
+
+        return result;   //change return type to a usable array
     }
 
 }
