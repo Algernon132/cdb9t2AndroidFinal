@@ -11,6 +11,9 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.util.Log;
 
@@ -119,10 +122,37 @@ public class MainActivity extends AppCompatActivity {
     public void display(Thermometer[] thermometers){
         //will change. just the simple textview
         final TextView textView = (TextView)findViewById(R.id.testDisplay);
-        for(Thermometer thermometer: thermometers){
-            textView.append(thermometer.getName());
-        }
+        final TableLayout tableLayout = (TableLayout)findViewById(R.id.contentTable);
 
+        Log.d("debug",Integer.toString(tableLayout.getChildCount()));
+
+
+        //if(tableLayout.getChildCount()!=0) tableLayout.removeViews(0,thermometers.length);
+
+        Log.d("debug",Integer.toString(tableLayout.getChildCount()));
+        Log.d("debug","length: " + Integer.toString(thermometers.length));
+
+        tableLayout.setStretchAllColumns(true);
+        tableLayout.bringToFront();
+        //https://stackoverflow.com/questions/18049708/how-to-create-a-dynamic-table-of-data-in-android/47495055
+        //Allows for any number of rows
+
+        //initialize table
+            for (int i = 0; i < thermometers.length; i++) {
+                TableRow tr = new TableRow(this);
+                TextView c1 = new TextView(this);
+                c1.setText(Integer.toString(thermometers[i].getTemp()));
+                TextView c2 = new TextView(this);
+                c2.setText(Integer.toString(thermometers[i].getId()));
+                TextView c3 = new TextView(this);
+                c3.setText(thermometers[i].getName());
+                //Screwed up the order on these lol
+                tr.addView(c2);
+                tr.addView(c3);
+                tr.addView(c1);
+                tableLayout.addView(tr);
+                Log.d("debug", "loop");
+            }
     }
 
     //will take the String returned by the server and put it into an array of Thermometers
