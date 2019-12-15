@@ -14,11 +14,19 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+
 
 public class MainActivity extends AppCompatActivity {
     //url of thermometer server
     //using Flask to serve JSON content, so port 5000
-    static final String URL = "http://ec2-3-15-14-91.us-east-2.compute.amazonaws.com:5000/";
+    static final String serverURL = "http://ec2-3-15-14-91.us-east-2.compute.amazonaws.com:5000/all";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("debug","console!");
@@ -27,15 +35,14 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        TextView text=findViewById(R.id.testDisplay);
-        text.setText(fetchTemps(URL, text));
+        final TextView text=findViewById(R.id.testDisplay);
+        fetchTemps(serverURL);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                fetchTemps(serverURL);
             }
         });
     }
@@ -62,23 +69,35 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public String fetchTemps(String serverURL, TextView textView){
+    public void fetchTemps(String serverURL){
         //contacts the server and retrieves the data
         //JSON format, contains temperature, name of thermometer, and datetime of when it was last updated
         //Will have to be asynchronous
 
-        String result;
-        HttpGetRequest getRequest = new HttpGetRequest();
-        try{
-            result = getRequest.execute(URL).get();
-            Log.d("debug","Called getRequest.execute");
-        }catch(Exception e){
-            result = "Could not connect to server";
-        }
+        final TextView textView = (TextView)findViewById(R.id.testDisplay);
 
-        textView.setText(result);
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-        return result;   //change return type to a usable array
+    // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, serverURL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        textView.setText(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //textView.setText(new String(error.networkResponse.data,"utf-8");
+                textView.setText("Failed" + error.toString());
+                Log.d("debug", error.toString());
+            }
+        });
+
+        queue.add(stringRequest);
     }
+
 
 }
