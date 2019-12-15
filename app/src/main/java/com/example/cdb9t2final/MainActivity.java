@@ -21,6 +21,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -35,9 +38,9 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final TextView text=findViewById(R.id.testDisplay);
         fetchTemps(serverURL);
 
+        //Floating Action Button is used to refresh the temperature data
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     public void fetchTemps(String serverURL){
         //contacts the server and retrieves the data
         //JSON format, contains temperature, name of thermometer, and datetime of when it was last updated
-        //Will have to be asynchronous
+        //https://developer.android.com/training/volley/simple.html
 
         final TextView textView = (TextView)findViewById(R.id.testDisplay);
 
@@ -84,19 +87,29 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
+                        // Display the response string.
                         textView.setText(response);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                //textView.setText(new String(error.networkResponse.data,"utf-8");
-                textView.setText("Failed" + error.toString());
+                textView.setText("");
+                createAlertDialog(error.toString());
                 Log.d("debug", error.toString());
             }
         });
 
         queue.add(stringRequest);
+    }
+
+    public void createAlertDialog(String message){
+        //Module 6 : Alert Dialog
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setCancelable(true);
+        alertDialogBuilder.setTitle("Could not connect to server");
+        alertDialogBuilder.setMessage(message);
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
 
